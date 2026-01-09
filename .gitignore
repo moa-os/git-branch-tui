@@ -1,0 +1,16 @@
+# Go build artifacts
+gbt
+bin/
+*.exe
+*.out
+
+# Go workspace
+go.work
+go.work.sum
+
+# OS junk
+.DS_Store
+
+# Editor junk
+.vscode/
+.idea/
