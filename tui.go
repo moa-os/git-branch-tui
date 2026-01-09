@@ -53,7 +53,7 @@ func initialModel() model {
 	l.SetShowTitle(false)
 	l.SetShowStatusBar(false)
 	l.SetShowHelp(false)
-	l.SetFilteringEnabled(true)
+	l.SetFilteringEnabled(false)
 
 	return model{
 		l:        l,
@@ -66,9 +66,6 @@ func initialModel() model {
 func (m model) Init() tea.Cmd { return loadBranchesCmd() }
 
 func (m *model) setItems(branches []branchItem) {
-	// Important when filtering is enabled, otherwise stale items can remain visible.
-	m.l.ResetFilter()
-
 	items := make([]list.Item, 0, len(branches))
 	for _, b := range branches {
 		items = append(items, b)
@@ -272,7 +269,7 @@ func (m model) View() string {
 	if m.errMsg != "" {
 		footer = sFooterErr.Width(m.width).Render("⚠ " + m.errMsg)
 	} else {
-		footer = sFooter.Width(m.width).Render("↑/↓ navigate   enter checkout   ⌫ delete   / filter   q quit   •   " + m.status)
+		footer = sFooter.Width(m.width).Render("↑/↓ navigate   enter checkout   ⌫ delete   q quit   •   " + m.status)
 	}
 
 	confirm := ""

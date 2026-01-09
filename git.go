@@ -27,7 +27,6 @@ func runGit(args ...string) (string, error) {
 }
 
 func getRepoName() string {
-	// Best-effort: show folder name. Works even if git commands fail.
 	wd, err := os.Getwd()
 	if err != nil {
 		return ""
@@ -66,8 +65,6 @@ func getBranches() ([]branchItem, string, error) {
 }
 
 func getUpstream(branch string) (string, error) {
-	// Example output: "origin/master"
-	// If no upstream is configured, this returns an error.
 	out, err := runGit("rev-parse", "--abbrev-ref", branch+"@{upstream}")
 	if err != nil {
 		return "", err
@@ -76,7 +73,6 @@ func getUpstream(branch string) (string, error) {
 }
 
 func getCommitLog(ref string) (string, error) {
-	// hash + subject only (last 5)
 	out, err := runGit("--no-pager", "log", "--pretty=format:%h %s", "-n", "5", ref)
 	if err != nil {
 		return "", err

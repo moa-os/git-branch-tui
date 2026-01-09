@@ -76,10 +76,9 @@ var (
 		Foreground(cMuted).
 		Padding(0, 1)
 
-	// selection = left bar + soft highlight (no rounded border)
 	sSelected = lipgloss.NewStyle().
 			Foreground(cText).
-			Background(lipgloss.Color("#152849")). // soft highlight
+			Background(lipgloss.Color("#152849")).
 			Padding(0, 1)
 
 	sSelBar = lipgloss.NewStyle().
@@ -94,7 +93,6 @@ var (
 			Bold(true)
 )
 
-// Custom delegate to render selection + current branch arrow
 type delegate struct{}
 
 func (d delegate) Height() int                             { return 1 }
