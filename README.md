@@ -29,7 +29,7 @@ If a branch has an upstream, you’ll see its recent commits in the side panel.
 Run this command:
 
 ```bash
-go install https://github.com/moa-os/git-branch-tui@v0.1.0
+go install https://github.com/moa-os/git-branch-tui@v0.2.0
 ```
 
 Make sure ~/go/bin is on your PATH.
