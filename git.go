@@ -65,6 +65,25 @@ func getBranches() ([]branchItem, string, error) {
 	return items, current, nil
 }
 
+func getUpstream(branch string) (string, error) {
+	// Example output: "origin/master"
+	// If no upstream is configured, this returns an error.
+	out, err := runGit("rev-parse", "--abbrev-ref", branch+"@{upstream}")
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(out), nil
+}
+
+func getCommitLog(ref string) (string, error) {
+	// hash + subject only (last 5)
+	out, err := runGit("--no-pager", "log", "--pretty=format:%h %s", "-n", "5", ref)
+	if err != nil {
+		return "", err
+	}
+	return out, nil
+}
+
 func checkoutBranch(name string) error {
 	_, err := runGit("checkout", name)
 	return err

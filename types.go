@@ -1,6 +1,8 @@
 package main
 
-import "github.com/charmbracelet/bubbles/list"
+import (
+	"github.com/charmbracelet/bubbles/list"
+)
 
 type branchItem struct {
 	name      string
@@ -28,6 +30,12 @@ type model struct {
 	pendingDel    string
 	width, height int
 	repoName      string
+
+	// Right panel state (shows only when selected branch has upstream)
+	selectedBranchName string
+	upstream           string
+	logText            string
+	logErr             string
 }
 
 type loadedMsg struct {
@@ -38,3 +46,23 @@ type loadedMsg struct {
 
 type errMsg string
 type statusMsg string
+
+type upstreamMsg struct {
+	branch   string
+	upstream string
+	err      error
+}
+
+type logMsg struct {
+	ref  string
+	text string
+	err  error
+}
+
+type checkoutDoneMsg struct {
+	branch string
+}
+
+type deleteDoneMsg struct {
+	branch string
+}

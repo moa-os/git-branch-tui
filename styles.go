@@ -9,73 +9,52 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-// palette (works well on dark terminals)
+// -------- Palette (modern, calm, one accent) --------
+
 var (
-	cBg      = lipgloss.Color("#0b1020") // deep navy
-	cPanel   = lipgloss.Color("#111a33")
-	cText    = lipgloss.Color("#e5e7eb")
-	cMuted   = lipgloss.Color("#93a4c7")
-	cAccent  = lipgloss.Color("#7dd3fc") // sky
-	cAccent2 = lipgloss.Color("#a78bfa") // violet
-	cDanger  = lipgloss.Color("#fb7185") // rose
-	cSuccess = lipgloss.Color("#34d399") // emerald
+	cSurface = lipgloss.Color("#0B1020") // deep midnight
+	cText    = lipgloss.Color("#F8FAFF") // bright white
+	cMuted   = lipgloss.Color("#8B93B5") // cool grey-violet
+	cFaint   = lipgloss.Color("#2A2F55") // neon-ish divider
+	cAccent  = lipgloss.Color("#00F5FF") // neon cyan
+	cDanger  = lipgloss.Color("#FF2FD6") // neon magenta
 )
 
+// -------- Layout styles --------
+
 var (
-	// header
-	sAppTitle = lipgloss.NewStyle().Bold(true).Foreground(cText)
-	sPill     = lipgloss.NewStyle().
-			Foreground(cBg).
-			Background(cAccent).
-			Bold(true).
-			Padding(0, 1).
-			MarginLeft(1).
-			Border(lipgloss.RoundedBorder()).
-			BorderForeground(cAccent)
-
-	sPillAlt = lipgloss.NewStyle().
-			Foreground(cBg).
-			Background(cAccent2).
-			Bold(true).
-			Padding(0, 1).
-			MarginLeft(1).
-			Border(lipgloss.RoundedBorder()).
-			BorderForeground(cAccent2)
-
 	sHeader = lipgloss.NewStyle().
-		Background(cPanel).
+		Background(cSurface).
 		Foreground(cMuted).
 		Padding(0, 1)
 
-	// list rows
-	sRow = lipgloss.NewStyle().
+	sDivider = lipgloss.NewStyle().
+			Foreground(cFaint)
+
+	sBrand = lipgloss.NewStyle().
+		Bold(true).
+		Foreground(cText)
+
+	sChip = lipgloss.NewStyle().
 		Foreground(cText).
-		Padding(0, 1)
+		Background(lipgloss.Color("#182443")).
+		Padding(0, 1).
+		MarginLeft(1)
 
-	sRowDim = lipgloss.NewStyle().
-		Foreground(cMuted).
-		Padding(0, 1)
-
-	sSelected = lipgloss.NewStyle().
-			Foreground(cBg).
+	sChipAccent = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#06121A")).
 			Background(cAccent).
 			Bold(true).
 			Padding(0, 1).
-			Border(lipgloss.RoundedBorder()).
-			BorderForeground(cAccent)
+			MarginLeft(1)
 
-	sCurrentBadge = lipgloss.NewStyle().
-			Foreground(cSuccess).
-			Bold(true)
-
-	// footer “toast”
-	sToast = lipgloss.NewStyle().
-		Background(cPanel).
+	sFooter = lipgloss.NewStyle().
+		Background(cSurface).
 		Foreground(cMuted).
 		Padding(0, 1)
 
-	sToastErr = lipgloss.NewStyle().
-			Background(cPanel).
+	sFooterErr = lipgloss.NewStyle().
+			Background(cSurface).
 			Foreground(cDanger).
 			Bold(true).
 			Padding(0, 1)
@@ -86,7 +65,36 @@ var (
 			Padding(0, 1)
 )
 
-// Custom delegate so we can render badges and nicer selection
+// -------- Row rendering (modern selection) --------
+
+var (
+	sRow = lipgloss.NewStyle().
+		Foreground(cText).
+		Padding(0, 1)
+
+	sRowDim = lipgloss.NewStyle().
+		Foreground(cMuted).
+		Padding(0, 1)
+
+	// selection = left bar + soft highlight (no rounded border)
+	sSelected = lipgloss.NewStyle().
+			Foreground(cText).
+			Background(lipgloss.Color("#152849")). // soft highlight
+			Padding(0, 1)
+
+	sSelBar = lipgloss.NewStyle().
+		Foreground(cAccent)
+
+	sRowActive = lipgloss.NewStyle().
+			Foreground(cAccent).
+			Padding(0, 1)
+
+	sCurrentArrow = lipgloss.NewStyle().
+			Foreground(cAccent).
+			Bold(true)
+)
+
+// Custom delegate to render selection + current branch arrow
 type delegate struct{}
 
 func (d delegate) Height() int                             { return 1 }
@@ -98,24 +106,34 @@ func (d delegate) Render(w io.Writer, m list.Model, index int, item list.Item) {
 		return
 	}
 
-	isSelected := index == m.Index()
+	selected := index == m.Index()
 
-	prefix := "  "
+	// Build a plain-text line so styles can apply uniformly (incl. background on hover)
+	line := "  " + b.name
 	if b.isCurrent {
-		prefix = sCurrentBadge.Render("●") + " "
+		line = "▶ " + b.name
 	}
 
-	line := prefix + b.name
+	// 1) Hover / selected row ALWAYS gets background
+	if selected {
+		bar := sSelBar.Render("│")
 
-	if isSelected {
-		fmt.Fprint(w, sSelected.Render(line))
+		// Current + selected: keep the hover background but use accent text color
+		if b.isCurrent {
+			fmt.Fprint(w, bar+sSelected.Foreground(cAccent).Render(line))
+			return
+		}
+
+		fmt.Fprint(w, bar+sSelected.Render(line))
 		return
 	}
 
-	if !b.isCurrent {
-		fmt.Fprint(w, sRowDim.Render(line))
+	// 2) Current branch (not selected): accent text
+	if b.isCurrent {
+		fmt.Fprint(w, " "+sRowActive.Render(line))
 		return
 	}
 
-	fmt.Fprint(w, sRow.Render(line))
+	// 3) Normal row
+	fmt.Fprint(w, " "+sRowDim.Render(line))
 }
